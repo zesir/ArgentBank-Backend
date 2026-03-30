@@ -1,0 +1,179 @@
+swagger: "2.0"
+
+info:
+  title: ArgentBank API
+  description: API pour gérer les transactions
+  version: "1.0.0"
+
+produces:
+  - application/json
+
+paths:
+  /accounts:
+    get:
+      summary: Liste des comptes d'un utilisateur
+      responses:
+        200:
+          description: Liste des comptes
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Account"
+        401:
+          description: Utilisateur non connecté
+
+  /accounts/{accountId}/transactions:
+    get:
+      summary: Liste des transactions d'un compte
+      description: "Retourne les transactions du compte pour un mois donné. Si le paramètre month n'est pas fourni, le mois en cours est utilisé."
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          type: string
+        - name: month
+          in: query
+          required: false
+          type: string
+          description: "Mois au format YYYY-MM (ex: 2026-01)"
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Transaction"
+        401:
+          description: Utilisateur non connecté
+        404:
+          description: Compte non trouvé
+
+  /accounts/{accountId}/transactions/{transactionId}:
+    get:
+      summary: Détail d'une transaction
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          type: string
+        - name: transactionId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Transaction trouvée
+          schema:
+            $ref: "#/definitions/Transaction"
+        401:
+          description: Utilisateur non connecté
+        404:
+          description: Transaction non trouvée
+
+    patch:
+      summary: Mise à jour de la catégorie ou de la note d’une transaction
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          type: string
+        - name: transactionId
+          in: path
+          required: true
+          type: string
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/TransactionUpdate"
+      responses:
+        200:
+          description: Transaction mise à jour
+          schema:
+            $ref: "#/definitions/Transaction"
+        401:
+          description: Utilisateur non connecté
+        404:
+          description: Transaction non trouvée
+
+  /accounts/{accountId}/transactions/categories:
+    get:
+      summary: Liste des catégories disponibles pour les transactions d'un compte
+      description: Retourne les catégories spécifiques aux transactions pour un compte donné. Les catégories ont un identifiant fixe pour faciliter la gestion multilingue côté front.
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Liste des catégories
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/TransactionCategory"
+        401:
+          description: Utilisateur non connecté
+        404:
+          description: Compte non trouvé
+
+definitions:
+  Account:
+    type: object
+    properties:
+      accountId:
+        type: string
+        example: "acc_987654"
+      name:
+        type: string
+        example: "Compte courant"
+      balance:
+        type: number
+        format: float
+        example: 1245.32
+
+  Transaction:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "tx_123456"
+      accountId:
+        type: string
+        example: "acc_987654"
+      date:
+        type: string
+        format: date
+        example: "2026-01-15"
+      description:
+        type: string
+      amount:
+        type: number
+        format: float
+      categoryIds:
+        type: array
+        items:
+          type: string
+          example: "CAT_FOOD"
+      note:
+        type: string
+
+  TransactionUpdate:
+    type: object
+    properties:
+      categoryIds:
+        type: array
+        items:
+          type: string
+      note:
+        type: string
+
+  TransactionCategory:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "CAT_FOOD"
+      label:
+        type: string
+        example: "Alimentation"
