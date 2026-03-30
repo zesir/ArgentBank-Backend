@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const databaseUrl =
   process.env.DATABASE_URL || "mongodb://127.0.0.1:27017/argentBankDB"; // <-- IPv4 forcé
-console.log("Connecting to:", databaseUrl);
+
 module.exports = async () => {
   try {
     await mongoose.connect(databaseUrl, {
